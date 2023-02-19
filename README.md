@@ -2,7 +2,7 @@
 
 An app that hooks into the foreground window change event and minimizes other windows when you focus alacritty so that you can see your wallpaper (background).
 
-I perrsonally use alacritty in fullscreen mode, which is achieved with:
+I like to use alacritty in fullscreen like this:
 
 ```yml
 window:
