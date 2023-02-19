@@ -21,6 +21,8 @@ Simply run the *minimize.exe* file.
 
 To stop it, run the *stop-minimize.bat*.
 
+If you want to also hide the taskbar, use *minimizeTask.exe*
+
 ## Compilation
 
 If you want to compile it yourself:
