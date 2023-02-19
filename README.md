@@ -20,3 +20,11 @@ window:
 Simply run the *minimize.exe* file.
 
 To stop it, run the *stop-minimize.bat*.
+
+## Compilation
+
+If you want to compile it yourself:
+
+```bash
+g++ minimize.cpp -o minimize.exe -Wl,-subsystem,windows
+```
