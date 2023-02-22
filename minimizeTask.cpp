@@ -3,8 +3,6 @@
 
 HWINEVENTHOOK hEvent;
 
-bool taskbarMinimized = false;
-
 typedef DWORD(WINAPI* GetModuleFileNameExFunc)(HANDLE hProcess, HMODULE hModule, LPWSTR lpFilename, DWORD nSize);
 GetModuleFileNameExFunc pGetModuleFileNameEx = (GetModuleFileNameExFunc)GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")), "K32GetModuleFileNameExW");
 
@@ -48,15 +46,12 @@ VOID CALLBACK WinEventProcCallback (HWINEVENTHOOK hWinEventHook, DWORD dwEvent, 
         //GetClassNameW(hwnd, windowClassName, MAX_PATH);
         //std::wcout << "Foreground window class name: " << "|" << windowClassName << "|" << std::endl << std::flush;
 
-        if (_wcsicmp(getOnlyProcess(processName), L"alacritty.exe") == 0) {
-            taskbarMinimized = true;
-            HWND taskbar = FindWindow("Shell_TrayWnd", NULL);
-            if (IsWindowVisible(taskbar))
-            {
-                ShowWindow(taskbar, SW_HIDE);
-            }
+        WCHAR windowClassName[MAX_PATH];
+        GetClassNameW(hwnd, windowClassName, MAX_PATH);
 
-            // Enumerate all top-level windows and minimize those that are not "alacritty.exe" windows
+        if (_wcsicmp(getOnlyProcess(processName), L"alacritty.exe") == 0) {
+            ShellExecute(NULL, "open", "hideTask.exe", NULL, NULL, SW_SHOWDEFAULT);
+
             EnumWindows([](HWND hwnd, LPARAM lParam) -> BOOL {
                 WCHAR windowProcessName[MAX_PATH];
                 DWORD windowProcessId;
@@ -71,15 +66,15 @@ VOID CALLBACK WinEventProcCallback (HWINEVENTHOOK hWinEventHook, DWORD dwEvent, 
                         CloseHandle(windowProcessHandle);
                     }
 
-                    WCHAR windowClassName[MAX_PATH];
-                    GetClassNameW(hwnd, windowClassName, MAX_PATH);
+                    WCHAR windowClassName2[MAX_PATH];
+                    GetClassNameW(hwnd, windowClassName2, MAX_PATH);
 
                     // If window is not alacritty AND SearchApp
                     if (_wcsicmp(getOnlyProcess(windowProcessName), L"alacritty.exe") &&
                         _wcsicmp(getOnlyProcess(windowProcessName), L"SearchApp.exe")) {
 
                         if (!_wcsicmp(getOnlyProcess(windowProcessName), L"explorer.exe")) {
-                            if (!_wcsicmp(windowClassName, L"CabinetWClass")) {
+                            if (!_wcsicmp(windowClassName2, L"CabinetWClass")) {
                                 ShowWindow(hwnd, SW_MINIMIZE);
                             }
                         } else {
@@ -90,13 +85,9 @@ VOID CALLBACK WinEventProcCallback (HWINEVENTHOOK hWinEventHook, DWORD dwEvent, 
 
                 return TRUE;
             }, 0);
-        } else {
-            taskbarMinimized = false;
+        } else if ((_wcsicmp(getOnlyProcess(processName), L"explorer.exe") == 0 && _wcsicmp(windowClassName, L"CabinetWClass") == 0 || _wcsicmp(getOnlyProcess(processName), L"explorer.exe"))) {
             HWND taskbar = FindWindow("Shell_TrayWnd", NULL);
-            if (!IsWindowVisible(taskbar))
-            {
-                ShowWindow(taskbar, SW_SHOW);
-            }
+            ShowWindow(taskbar, SW_SHOW);
         }
     }
 
